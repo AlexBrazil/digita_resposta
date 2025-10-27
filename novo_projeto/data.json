@@ -1,7 +1,7 @@
 {
   "description": "Digite o nome das figuras geométricas",
   "progressText": "Cartão @card de @total",
-  "next": "Next",
+  "next": "Próximo",
   "previous": "Anterior",
   "checkAnswerText": "Verifique",
   "showSolutionsRequiresInput": true,
@@ -20,52 +20,61 @@
   "correctAnswerAnnouncement": "@answer está correta.",
   "pageAnnouncement": "Página @current de @total",
   "randomCards": true,
+  "matchingMode": "resposta aproximada",
   "cards": [
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Quadrado",
+      "answers": ["Quadrado"],
       "tip": "",
       "image": "assets/image-C12Baxt2.png"
     },
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Círculo",
+      "answers": ["Círculo", "Circulo"],
       "tip": "",
       "image": "assets/image-l0c2v6el.png"
     },
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Elipse",
+      "answers": ["Elipse"],
       "tip": "",
       "image": "assets/image-SxmRTZL7.png"
     },
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Trapézio",
+      "answers": ["Trapézio", "Trapezio", "Trapesio", "Trapeseo"],
       "tip": "",
       "image": "assets/image-jXniGA9M.png"
     },
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Triângulo",
+      "answers": ["Triângulo", "Triangulo"],
       "tip": "",
       "image": "assets/image-uW31jjfI.png"
     },
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Pentágono",
+      "answers": ["Pentágono", "Pentagono"],
       "tip": "",
       "image": "assets/image-u3F5RV25.png"
     },
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Hexágono",
+      "answers": ["Hexágono", "Hexagono", "exagono", "exágono"],
       "tip": "",
       "image": "assets/image-N3pVABT1.png"
     },
     {
       "text": "Qual o nome desta figura geométrica?",
       "answer": "Losango",
+      "answers": ["Losango"],
       "tip": "",
       "image": "assets/image-ZU88ip3j.png"
     }

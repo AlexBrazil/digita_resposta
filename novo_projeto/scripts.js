@@ -54,7 +54,7 @@
         correctAnswerText: 'Correto',
         incorrectAnswerText: 'Incorreto',
         showSolutionText: 'Resposta correta',
-        informationText: 'Informação',
+        informationText: 'Informações',
         results: 'Resultados',
         ofCorrect: '@score de @total corretos',
         showResults: 'Mostrar resultados',
@@ -65,11 +65,12 @@
         correctAnswerAnnouncement: '@answer está correta.',
         pageAnnouncement: 'Página @current de @total',
         randomCards: false,
+        matchingMode: 'resposta exata',
         cards: []
       };
 
       this.config = Object.assign({}, this.defaults, config || {});
-      this.originalCards = (this.config.cards || []).map(card => Object.assign({}, card));
+      this.originalCards = JSON.parse(JSON.stringify(this.config.cards || []));
       this.instanceId = `fc-${Math.random().toString(36).slice(2, 9)}`;
 
       this.cards = [];
@@ -92,7 +93,7 @@
     }
 
     resetState() {
-      this.cards = this.originalCards.map(card => Object.assign({}, card));
+      this.cards = this.originalCards.map(card => this.prepareCard(this.cloneCard(card)));
       if (this.config.randomCards) {
         this.shuffle(this.cards);
       }
@@ -101,6 +102,44 @@
       this.numAnswered = 0;
       this.currentIndex = 0;
       this.clearPendingTimer();
+    }
+
+    cloneCard(card) {
+      return JSON.parse(JSON.stringify(card));
+    }
+
+    prepareCard(rawCard) {
+      const card = Object.assign({}, rawCard);
+      const variants = [];
+
+      if (Array.isArray(card.answers) && card.answers.length) {
+        card.answers.forEach(value => {
+          if (typeof value === 'string') {
+            const cleaned = this.cleanAnswerValue(value);
+            if (cleaned.length) {
+              variants.push(cleaned);
+            }
+          }
+        });
+      }
+
+      if (!variants.length && typeof card.answer === 'string') {
+        splitAlternatives(card.answer).forEach(value => {
+          const cleaned = this.cleanAnswerValue(value);
+          if (cleaned.length) {
+            variants.push(cleaned);
+          }
+        });
+      }
+
+      if (!variants.length) {
+        const fallback = this.cleanAnswerValue(card.answer || '');
+        variants.push(fallback);
+      }
+
+      card.answerVariants = variants;
+      card.answer = variants[0] || '';
+      return card;
     }
 
     render() {
@@ -413,7 +452,7 @@
         solutionPrefix.textContent = `${this.config.showSolutionText}:`;
         solvedText.appendChild(solutionPrefix);
         const solutionValue = document.createElement('span');
-        solutionValue.textContent = this.formatSolution(card.answer);
+        solutionValue.textContent = this.formatSolution(card);
         solutionValue.className = 'fc-results-correct';
         solvedText.appendChild(solutionValue);
         solution.appendChild(solvedText);
@@ -655,7 +694,7 @@
 
           const correctAnswer = document.createElement('span');
           correctAnswer.className = 'fc-results-correct';
-          correctAnswer.textContent = this.formatSolution(card.answer);
+          correctAnswer.textContent = this.formatSolution(card);
           answer.appendChild(correctAnswer);
         }
 
@@ -680,19 +719,43 @@
     }
 
     isCorrectAnswer(card, userAnswer) {
-      const decoded = this.decodeHtml(card.answer || '');
-      const possibilities = splitAlternatives(decoded);
-
-      if (!this.config.caseSensitive) {
-        const normalizedUserAnswer = (userAnswer || '').toLocaleLowerCase();
-        return possibilities.some(answer => answer.toLocaleLowerCase() === normalizedUserAnswer);
+      const variants = Array.isArray(card.answerVariants) ? card.answerVariants : [];
+      if (!variants.length) {
+        return false;
       }
 
-      return possibilities.some(answer => answer === (userAnswer || ''));
+      const cleanedUser = this.cleanAnswerValue(userAnswer);
+      const mode = this.getMatchingMode();
+
+      if (mode === 'approximate') {
+        if (!cleanedUser.length) {
+          return false;
+        }
+        const normalizedUser = this.normalizeForApprox(cleanedUser);
+        return variants.some(variant => this.normalizeForApprox(variant) === normalizedUser);
+      }
+
+      const prepare = this.config.caseSensitive
+        ? value => value
+        : value => value.toLocaleLowerCase();
+
+      const normalizedUser = prepare(cleanedUser);
+      const canonical = variants[0] || '';
+      return prepare(canonical) === normalizedUser;
     }
 
-    formatSolution(answer) {
-      return splitAlternatives(this.decodeHtml(answer || '')).join(', ');
+    formatSolution(card) {
+      const variants = Array.isArray(card.answerVariants) ? card.answerVariants : [];
+      if (!variants.length) {
+        return '';
+      }
+      const unique = [];
+      variants.forEach(value => {
+        if (!unique.includes(value)) {
+          unique.push(value);
+        }
+      });
+      return unique.join(', ');
     }
 
     shuffle(array) {
@@ -708,6 +771,33 @@
       temp.innerHTML = value;
       return temp.textContent || temp.innerText || '';
     }
+
+    getMatchingMode() {
+      const mode = (this.config.matchingMode || '').toLocaleLowerCase();
+      if (mode.includes('aproximada')) {
+        return 'approximate';
+      }
+      if (mode.includes('aproximado')) {
+        return 'approximate';
+      }
+      return 'exact';
+    }
+
+    cleanAnswerValue(value) {
+      if (value === null || value === undefined) {
+        return '';
+      }
+      return this.decodeHtml(String(value)).trim();
+    }
+
+    normalizeForApprox(value) {
+      const cleaned = this.cleanAnswerValue(value);
+      if (!cleaned.length) {
+        return '';
+      }
+      const withoutMarks = stripDiacritics(cleaned);
+      return withoutMarks.replace(/\s+/g, ' ').trim().toLocaleLowerCase();
+    }
   }
 
   function splitAlternatives(text, delimiter = '/', escaper = '\\') {
@@ -722,9 +812,16 @@
       processed = processed.replace(escaper + delimiter, placeholder);
     }
 
-    return processed
-      .split(delimiter)
-      .map(part => part.replace(new RegExp(placeholder, 'g'), delimiter).trim())
-      .filter(Boolean);
+  return processed
+    .split(delimiter)
+    .map(part => part.replace(new RegExp(placeholder, 'g'), delimiter).trim())
+    .filter(Boolean);
+}
+
+function stripDiacritics(value) {
+  if (typeof value.normalize !== 'function') {
+    return value;
   }
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 })();
