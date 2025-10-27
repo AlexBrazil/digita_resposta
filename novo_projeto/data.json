@@ -1,0 +1,73 @@
+{
+  "description": "Digite o nome das figuras geométricas",
+  "progressText": "Cartão @card de @total",
+  "next": "Next",
+  "previous": "Anterior",
+  "checkAnswerText": "Verifique",
+  "showSolutionsRequiresInput": true,
+  "defaultAnswerText": "Sua resposta",
+  "correctAnswerText": "Correto",
+  "incorrectAnswerText": "Incorreto",
+  "showSolutionText": "Resposta correta",
+  "results": "Resultados",
+  "ofCorrect": "@score de @total corretos",
+  "showResults": "Mostrar resultados",
+  "answerShortText": "A:",
+  "informationText": "Informações",
+  "retry": "Repetir",
+  "caseSensitive": false,
+  "cardAnnouncement": "Resposta incorreta. A resposta correta foi @answer",
+  "correctAnswerAnnouncement": "@answer está correta.",
+  "pageAnnouncement": "Página @current de @total",
+  "randomCards": true,
+  "cards": [
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Quadrado",
+      "tip": "",
+      "image": "assets/image-C12Baxt2.png"
+    },
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Círculo",
+      "tip": "",
+      "image": "assets/image-l0c2v6el.png"
+    },
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Elipse",
+      "tip": "",
+      "image": "assets/image-SxmRTZL7.png"
+    },
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Trapézio",
+      "tip": "",
+      "image": "assets/image-jXniGA9M.png"
+    },
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Triângulo",
+      "tip": "",
+      "image": "assets/image-uW31jjfI.png"
+    },
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Pentágono",
+      "tip": "",
+      "image": "assets/image-u3F5RV25.png"
+    },
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Hexágono",
+      "tip": "",
+      "image": "assets/image-N3pVABT1.png"
+    },
+    {
+      "text": "Qual o nome desta figura geométrica?",
+      "answer": "Losango",
+      "tip": "",
+      "image": "assets/image-ZU88ip3j.png"
+    }
+  ]
+}

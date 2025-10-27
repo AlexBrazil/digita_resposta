@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>H5P Player — h5p-standalone (CDN)</title>
+    <!-- Player via CDN; troque @latest por uma versão fixa se preferir estabilidade, e.g. @3.8.0 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/h5p-standalone@latest/dist/styles/h5p.css">
+    <style>
+      html, body { height: 100%; margin: 0; }
+      #h5p-container { width: 100%; min-height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="h5p-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/h5p-standalone@latest/dist/main.bundle.js" charset="UTF-8"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const el = document.getElementById('h5p-container');
+        new H5PStandalone.H5P(el, {
+          // Aponte para a pasta onde você extraiu seu .h5p (que deve conter h5p.json, content/, libraries/)
+          h5pJsonPath: './conteudos/meu-quiz',
+          librariesPath: './conteudos/meu-quiz/libraries',
+          frameJs: 'https://cdn.jsdelivr.net/npm/h5p-standalone@latest/dist/frame.bundle.js',
+          frameCss: 'https://cdn.jsdelivr.net/npm/h5p-standalone@latest/dist/styles/h5p.css',
+        });
+      });
+    </script>
+  </body>
+</html>
