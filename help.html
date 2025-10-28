@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Guia rapido - Digite a resposta</title>
+</head>
+<body>
+<h1>Configurar nova atividade</h1>
+<p>Use estas orientacoes para preencher o arquivo <code>data.json</code> do jogo de digitar respostas.</p>
+
+<h2>Antes de editar</h2>
+<ul>
+  <li>Guarde uma copia de seguranca de <code>data.json</code>.</li>
+  <li>Edite com um editor de texto simples (UTF-8) e valide o JSON apos salvar.</li>
+  <li>Abra <code>index.html</code> no navegador para testar cada alteracao.</li>
+</ul>
+
+<h2>Campos gerais</h2>
+<ul>
+  <li><code>description</code>: texto introdutorio exibido acima dos cartoes.</li>
+  <li><code>progressText</code>: legenda do andamento. Use <code>@card</code> para o numero atual e <code>@total</code> para o total de cartoes.</li>
+  <li><code>next</code> e <code>previous</code>: rotulos dos botoes de navegacao.</li>
+  <li><code>checkAnswerText</code>: texto do botao que corrige a resposta.</li>
+  <li><code>defaultAnswerText</code>: placeholder mostrado dentro do campo de resposta.</li>
+  <li><code>correctAnswerText</code> e <code>incorrectAnswerText</code>: mensagens curtas usadas no feedback apos corrigir.</li>
+  <li><code>showSolutionText</code>: rotulo usado onde a resposta correta aparece.</li>
+  <li><code>informationText</code>: texto do botao de dica (so aparece quando o cartao possui <code>tip</code>).</li>
+  <li><code>results</code>, <code>showResults</code> e <code>answerShortText</code>: textos usados na tela de resultados.</li>
+  <li><code>ofCorrect</code>: frase do placar final. Aceita <code>@score</code> (acertos) e <code>@total</code> (total de cartoes).</li>
+  <li><code>showResultsRequiresInput</code>: quando <code>true</code>, obriga digitar algo antes de revelar a solucao.</li>
+  <li><code>caseSensitive</code>: defina <code>true</code> se a resposta deve respeitar letras maiusculas/minusculas.</li>
+  <li><code>timerSeconds</code>: limite de tempo em segundos. Omitir ou usar zero desativa a contagem regressiva.</li>
+  <li><code>randomCards</code>: embaralha os cartoes quando definido como <code>true</code>.</li>
+</ul>
+
+<h2>Acessibilidade</h2>
+<ul>
+  <li><code>cardAnnouncement</code>: mensagem lida quando a resposta esta errada. Use <code>@answer</code> para inserir a solucao.</li>
+  <li><code>correctAnswerAnnouncement</code>: mensagem lida quando a resposta esta correta (<code>@answer</code> vira a tentativa digitada).</li>
+  <li><code>pageAnnouncement</code>: narracao usada ao trocar de cartao. Inclua <code>@current</code> (numero atual) e <code>@total</code> (total de cartoes).</li>
+</ul>
+
+<h2>Cartoes (<code>cards</code>)</h2>
+<p>Cada cartao da atividade fica dentro da lista <code>cards</code> e usa o formato:</p>
+<pre><code>{
+  "text": "Pergunta mostrada para o aluno",
+  "answers": ["Resposta oficial", "Variante aceita"],
+  "tip": "Dica opcional",
+  "image": "assets/imagem.png",
+  "altText": "Descricao da imagem"
+}</code></pre>
+<ul>
+  <li><code>text</code> (obrigatorio): pergunta exibida no cartao.</li>
+  <li><code>answers</code> (obrigatorio): lista com todas as respostas validas. A primeira entrada vira a solucao oficial exibida ao corrigir.</li>
+  <li><code>tip</code> (opcional): dica curta exibida no botao de informacao.</li>
+  <li><code>image</code> (opcional): caminho relativo para uma imagem ilustrativa.</li>
+  <li><code>altText</code> (opcional): texto alternativo da imagem. Se ausente, o sistema usa <code>text</code> como descricao.</li>
+</ul>
+<p>Evite respostas vazias: cada cartao precisa de pelo menos uma variacao valida. A verificacao ignora espacos duplos e, se <code>caseSensitive</code> estiver em <code>false</code>, ignora diferencas de maiusculas.</p>
+
+<h2>Depois de editar</h2>
+<ul>
+  <li>Teste todas as respostas (corretas e incorretas) e confira as mensagens exibidas.</li>
+  <li>Se usar limite de tempo, verifique o comportamento ao esgotar o cronometro.</li>
+  <li>Revise a tela de resultados para garantir que textos, imagens e solucoes apareceram corretamente.</li>
+</ul>
+</body>
+</html>

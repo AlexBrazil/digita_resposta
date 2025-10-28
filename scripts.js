@@ -83,6 +83,7 @@
       this.timerTotalSeconds = this.parseTimerSeconds(this.config.timerSeconds);
       this.remainingSeconds = this.timerTotalSeconds;
       this.timerInterval = null;
+      this.timeExpired = false;
 
       this.refs = {};
     }
@@ -107,6 +108,7 @@
       this.currentIndex = 0;
       this.clearPendingTimer();
       this.stopTimer();
+      this.timeExpired = false;
       this.remainingSeconds = this.timerTotalSeconds;
     }
 
@@ -181,6 +183,7 @@
       if (this.hasTimer()) {
         const timer = this.createTimer();
         progressRow.appendChild(timer);
+        this.createTimeUpModal(app);
       }
 
       const visualProgress = document.createElement('div');
@@ -341,6 +344,73 @@
       return timer;
     }
 
+    createTimeUpModal(parent) {
+      const existingModal = this.refs.timeUpModal;
+      if (existingModal && existingModal.parentElement === parent) {
+        return;
+      }
+
+      const backdrop = document.createElement('div');
+      backdrop.className = 'fc-timeup-backdrop';
+      backdrop.hidden = true;
+
+      const modal = document.createElement('div');
+      modal.className = 'fc-timeup-modal';
+      modal.hidden = true;
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      const titleId = `${this.instanceId}-timeup-title`;
+      modal.setAttribute('aria-labelledby', titleId);
+
+      const content = document.createElement('div');
+      content.className = 'fc-timeup-content';
+
+      const title = document.createElement('h2');
+      title.className = 'fc-timeup-title';
+      title.id = titleId;
+      title.textContent = 'Tempo esgotado';
+      content.appendChild(title);
+
+      const message = document.createElement('p');
+      message.className = 'fc-timeup-message';
+      message.textContent = 'O tempo da atividade terminou. Escolha uma opção para continuar.';
+      content.appendChild(message);
+
+      const actions = document.createElement('div');
+      actions.className = 'fc-timeup-actions';
+
+      const retryButton = document.createElement('button');
+      retryButton.type = 'button';
+      retryButton.className = 'fc-button fc-timeup-button is-secondary';
+      retryButton.textContent = 'Repetir';
+      retryButton.addEventListener('click', () => {
+        this.hideTimeUpModal();
+        this.resetTask();
+      });
+      actions.appendChild(retryButton);
+
+      const resultsButton = document.createElement('button');
+      resultsButton.type = 'button';
+      resultsButton.className = 'fc-button fc-timeup-button';
+      resultsButton.textContent = 'Mostrar resultados';
+      resultsButton.addEventListener('click', () => {
+        this.hideTimeUpModal();
+        this.showResults(true);
+      });
+      actions.appendChild(resultsButton);
+
+      content.appendChild(actions);
+      modal.appendChild(content);
+
+      parent.appendChild(backdrop);
+      parent.appendChild(modal);
+
+      this.refs.timeUpBackdrop = backdrop;
+      this.refs.timeUpModal = modal;
+      this.refs.timeUpRepeatButton = retryButton;
+      this.refs.timeUpResultsButton = resultsButton;
+    }
+
     startTimer() {
       if (!this.hasTimer()) {
         return;
@@ -378,12 +448,65 @@
       }
     }
 
+    disableRemainingInputs() {
+      if (!Array.isArray(this.inputEls) || !Array.isArray(this.checkButtons)) {
+        return;
+      }
+      this.inputEls.forEach(input => {
+        if (input && !input.disabled) {
+          input.disabled = true;
+        }
+      });
+      this.checkButtons.forEach(button => {
+        if (button && !button.disabled) {
+          button.disabled = true;
+        }
+      });
+      if (this.refs.prevButton) {
+        this.refs.prevButton.disabled = true;
+      }
+      if (this.refs.nextButton) {
+        this.refs.nextButton.disabled = true;
+      }
+    }
+
+    showTimeUpModal() {
+      if (!this.refs.timeUpModal || !this.refs.timeUpBackdrop) {
+        return;
+      }
+      this.refs.timeUpBackdrop.hidden = false;
+      this.refs.timeUpModal.hidden = false;
+      this.refs.timeUpBackdrop.classList.add('is-visible');
+      this.refs.timeUpModal.classList.add('is-visible');
+      if (this.refs.timeUpRepeatButton) {
+        this.refs.timeUpRepeatButton.focus();
+      }
+    }
+
+    hideTimeUpModal() {
+      if (!this.refs.timeUpModal || !this.refs.timeUpBackdrop) {
+        return;
+      }
+      this.refs.timeUpBackdrop.hidden = true;
+      this.refs.timeUpModal.hidden = true;
+      this.refs.timeUpBackdrop.classList.remove('is-visible');
+      this.refs.timeUpModal.classList.remove('is-visible');
+    }
+
     handleTimerExpired() {
+      if (this.timeExpired) {
+        return;
+      }
+      this.timeExpired = true;
+      this.clearPendingTimer();
       this.updateTimerDisplay();
       if (this.refs.timerContainer) {
         this.refs.timerContainer.classList.add('is-finished');
         this.refs.timerContainer.classList.remove('is-ending');
       }
+      this.disableRemainingInputs();
+      this.stopTimer();
+      this.showTimeUpModal();
       this.ariaAnnounce('Tempo esgotado.');
     }
 
@@ -554,7 +677,7 @@
       const readableAnswer = userAnswer || this.decodeHtml(card.primaryAnswer || '');
       feedback.textContent = isCorrect
         ? `${this.config.correctAnswerText}! Você digitou "${readableAnswer}".`
-        : `${this.config.incorrectAnswerText}. Confira a resposta correta abaixo.`;
+        : `${this.config.incorrectAnswerText}. Confira a resposta correta acima.`;
       wrapper.appendChild(feedback);
 
       const solution = document.createElement('div');
@@ -744,13 +867,15 @@
       this.refs.ariaAnnouncer.textContent = message;
     }
 
-    showResults() {
-      if (this.numAnswered < this.cards.length) {
+    showResults(force = false) {
+      const canShow = this.numAnswered >= this.cards.length || this.timeExpired || force;
+      if (!canShow) {
         return;
       }
 
       this.clearPendingTimer();
       this.stopTimer();
+      this.hideTimeUpModal();
       this.populateResults();
 
       if (this.refs.main) {
@@ -807,7 +932,8 @@
 
         const answerValue = document.createElement('span');
         const userAnswer = this.answers[index];
-        answerValue.textContent = userAnswer && userAnswer.length ? userAnswer : '—';
+        const hasAnswer = typeof userAnswer === 'string' && userAnswer.trim().length > 0;
+        answerValue.textContent = hasAnswer ? userAnswer : 'Sem resposta';
         answer.appendChild(answerValue);
 
         if (this.status[index] !== 'correct') {
@@ -831,6 +957,7 @@
     }
 
     resetTask() {
+      this.hideTimeUpModal();
       this.resetState();
       this.render();
     }
